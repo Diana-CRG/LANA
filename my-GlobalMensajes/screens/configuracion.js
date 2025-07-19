@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   Linking,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -17,283 +18,230 @@ import {
   Lock,
   User,
   LogOut,
-  Heart, // Icono para preferencias
-  Clock, // Icono para horario
-  GenderMale, // Icono para género (usaremos un genérico de lucide)
-} from 'lucide-react-native'; // Importa los iconos necesarios
+  Settings,
+  Search,
+  Home,
+} from 'lucide-react-native';
 
-// Componente para un elemento de configuración
-const SettingsItem = ({ icon: Icon, title, onPress, showChevron = true, children }) => (
-  <TouchableOpacity style={styles.settingsItem} onPress={onPress} disabled={!onPress}>
+const SettingsItem = ({ icon: Icon, title, onPress, showChevron = true, children, danger = false }) => (
+  <TouchableOpacity style={[styles.settingsItem, danger && styles.dangerItem]} onPress={onPress} disabled={!onPress}>
     <View style={styles.settingsItemLeft}>
-      {Icon && <Icon size={24} color="#333" style={styles.settingsIcon} />}
-      <Text style={styles.settingsItemText}>{title}</Text>
+      {Icon && <Icon size={24} color={danger ? '#B00020' : '#fff'} style={styles.settingsIcon} />}
+      <Text style={[styles.settingsItemText, danger && styles.dangerText]}>{title}</Text>
     </View>
     <View style={styles.settingsItemRight}>
       {children}
-      {showChevron && onPress && <ChevronRight size={20} color="#999" />}
+      {showChevron && onPress && <ChevronRight size={20} color="#ccc" />}
     </View>
   </TouchableOpacity>
 );
 
-// Interfaz de Configuración
 const ConfiguracionScreen = ({ navigation }) => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [privacyMode, setPrivacyMode] = useState(false);
-  // Nuevos estados para preferencias de roomie
-  const [genderPreference, setGenderPreference] = useState('Cualquiera'); // 'Hombre', 'Mujer', 'Cualquiera'
-  const [schedulePreference, setSchedulePreference] = useState('Diurno'); // 'Diurno', 'Nocturno', 'Flexible'
-  const [hasPets, setHasPets] = useState(false);
-  const [isSmoker, setIsSmoker] = useState(false);
-  const [cleanlinessPreference, setCleanlinessPreference] = useState('Normal'); // 'Muy Limpio', 'Normal', 'Relajado'
-
+  const [msgNotif, setMsgNotif] = useState(true);
+  const [soundNotif, setSoundNotif] = useState(true);
+  const [vibrationNotif, setVibrationNotif] = useState(false);
+  const [privacyOnline, setPrivacyOnline] = useState(true);
+  const [blockedUsers, setBlockedUsers] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Cerrar Sesión',
-      '¿Estás seguro de que quieres cerrar sesión?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Sí',
-          onPress: () => {
-            // Lógica para cerrar sesión
-            console.log('Usuario cerró sesión');
-            Alert.alert('Sesión Cerrada', 'Has cerrado sesión exitosamente.');
-            // Aquí podrías navegar a la pantalla de inicio de sesión
-            // navigation.navigate('Login');
-          },
+    Alert.alert('Cerrar Sesión', '¿Estás segura de que deseas cerrar sesión?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sí',
+        onPress: () => {
+          console.log('Sesión cerrada');
+          Alert.alert('Sesión cerrada exitosamente');
         },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleEditProfile = () => {
-    Alert.alert('Editar Perfil', 'Navegar a la pantalla de edición de perfil, incluyendo información personal y de roomie.');
-    // navigation.navigate('EditProfile');
-  };
-
-  const handlePrivacySettings = () => {
-    Alert.alert('Ajustes de Privacidad', 'Navegar a la pantalla de ajustes de privacidad.');
-    // navigation.navigate('PrivacySettings');
-  };
-
-  const handleAbout = () => {
-    Alert.alert('Acerca de Poli-Roomies', 'Información sobre la aplicación y la versión.');
-    // navigation.navigate('About');
-  };
-
-  // Handlers para las nuevas preferencias de roomie
-  const handleGenderPreference = () => {
-    Alert.alert(
-      'Preferencia de Género',
-      'Selecciona el género de tu roomie preferido:',
-      [
-        { text: 'Hombre', onPress: () => setGenderPreference('Hombre') },
-        { text: 'Mujer', onPress: () => setGenderPreference('Mujer') },
-        { text: 'Cualquiera', onPress: () => setGenderPreference('Cualquiera') },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleSchedulePreference = () => {
-    Alert.alert(
-      'Preferencia de Horario',
-      '¿Qué tipo de horario prefieres para tu roomie?',
-      [
-        { text: 'Diurno', onPress: () => setSchedulePreference('Diurno') },
-        { text: 'Nocturno', onPress: () => setSchedulePreference('Nocturno') },
-        { text: 'Flexible', onPress: () => setSchedulePreference('Flexible') },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleCleanlinessPreference = () => {
-    Alert.alert(
-      'Preferencia de Limpieza',
-      '¿Qué tan limpio te gustaría que fuera tu roomie?',
-      [
-        { text: 'Muy Limpio', onPress: () => setCleanlinessPreference('Muy Limpio') },
-        { text: 'Normal', onPress: () => setCleanlinessPreference('Normal') },
-        { text: 'Relajado', onPress: () => setCleanlinessPreference('Relajado') },
-      ],
-      { cancelable: true }
-    );
+      },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Configuración</Text>
+      <ImageBackground
+        source={require('../assets/logo_fondo.jpeg')}
+        style={styles.background}
+        imageStyle={{ opacity: 0.05 }}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.header}>Configuración</Text>
 
-        {/* Sección de Cuenta */}
-        <Text style={styles.sectionHeader}>Cuenta</Text>
-        <SettingsItem
-          icon={User}
-          title="Editar Perfil"
-          onPress={handleEditProfile}
-        />
+          {/* Notificaciones */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notificaciones</Text>
+            <SettingsItem title="Notificación por mensaje" showChevron={false}>
+              <Switch value={msgNotif} onValueChange={setMsgNotif} />
+            </SettingsItem>
+            <SettingsItem title="Notificación por sonido" showChevron={false}>
+              <Switch value={soundNotif} onValueChange={setSoundNotif} />
+            </SettingsItem>
+            <SettingsItem title="Notificación por vibración" showChevron={false}>
+              <Switch value={vibrationNotif} onValueChange={setVibrationNotif} />
+            </SettingsItem>
+          </View>
 
-        {/* Sección de Preferencias de Roomie */}
-        <Text style={styles.sectionHeader}>Preferencias de Roomie</Text>
-        <SettingsItem
-          icon={Heart} // Usamos un icono genérico para preferencias
-          title={`Género: ${genderPreference}`}
-          onPress={handleGenderPreference}
-        />
-        <SettingsItem
-          icon={Clock}
-          title={`Horario: ${schedulePreference}`}
-          onPress={handleSchedulePreference}
-        />
-        <SettingsItem
-          icon={Heart}
-          title={`Limpieza: ${cleanlinessPreference}`}
-          onPress={handleCleanlinessPreference}
-        />
-        <SettingsItem icon={Heart} title="Tiene Mascotas" showChevron={false}>
-          <Switch
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={hasPets ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={setHasPets}
-            value={hasPets}
-          />
-        </SettingsItem>
-        <SettingsItem icon={Heart} title="Es Fumador" showChevron={false}>
-          <Switch
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={isSmoker ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={setIsSmoker}
-            value={isSmoker}
-          />
-        </SettingsItem>
-        {/* Aquí podrías añadir más preferencias como intereses comunes, hábitos, etc. */}
+          {/* Privacidad */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Privacidad</Text>
+            <SettingsItem title="Visibilidad en línea" showChevron={false}>
+              <Switch value={privacyOnline} onValueChange={setPrivacyOnline} />
+            </SettingsItem>
+            <SettingsItem title="Usuarios bloqueados" showChevron={false}>
+              <Switch value={blockedUsers} onValueChange={setBlockedUsers} />
+            </SettingsItem>
+          </View>
 
+          {/* Soporte */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Soporte</Text>
+            <SettingsItem
+              title="Preguntas Frecuentes"
+              icon={HelpCircle}
+              onPress={() => navigation.navigate('FAQ')}
+            />
+            <SettingsItem
+              title="Contactar Soporte"
+              icon={HelpCircle}
+              onPress={() => navigation.navigate('SoporteChat')}
+            />
+            <SettingsItem
+              title="Acerca de la Aplicación"
+              icon={HelpCircle}
+              onPress={() => Alert.alert('Versión 1.0.0')}
+            />
+            <SettingsItem
+              title="Políticas"
+              icon={HelpCircle}
+              onPress={() => Linking.openURL('https://www.tuapp.com/politicas')}
+            />
+          </View>
 
-        {/* Sección de Notificaciones */}
-        <Text style={styles.sectionHeader}>Notificaciones</Text>
-        <SettingsItem icon={Bell} title="Habilitar Notificaciones" showChevron={false}>
-          <Switch
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={notificationsEnabled ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={setNotificationsEnabled}
-            value={notificationsEnabled}
-          />
-        </SettingsItem>
+          {/* Cuenta */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Cuenta</Text>
+            <SettingsItem title="Cambiar Contraseña" icon={Lock} onPress={() => navigation.navigate('CambiarContra')} />
+            <SettingsItem
+              title="Cerrar Sesión"
+              icon={LogOut}
+              onPress={handleLogout}
+              showChevron={false}
+              danger
+            />
+          </View>
+        </ScrollView>
 
-        {/* Sección de Privacidad */}
-        <Text style={styles.sectionHeader}>Privacidad</Text>
-        <SettingsItem
-          icon={Lock}
-          title="Ajustes de Privacidad"
-          onPress={handlePrivacySettings}
-        />
-        <SettingsItem icon={Lock} title="Modo Privado" showChevron={false}>
-          <Switch
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={privacyMode ? '#f5dd4b' : '#f4f3f4'}
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={setPrivacyMode}
-            value={privacyMode}
-          />
-        </SettingsItem>
-
-        {/* Sección de Soporte */}
-        <Text style={styles.sectionHeader}>Soporte</Text>
-        <SettingsItem
-          icon={HelpCircle}
-          title="Preguntas Frecuentes"
-          onPress={() => navigation.navigate('FAQ')} // Navegar a la pantalla de FAQ
-        />
-        <SettingsItem
-          icon={HelpCircle}
-          title="Acerca de Poli-Roomies"
-          onPress={handleAbout}
-        />
-        <SettingsItem
-          icon={HelpCircle}
-          title="Términos y Condiciones"
-          onPress={() => Linking.openURL('https://www.example.com/terms')} // Ejemplo de enlace externo
-        />
-
-        {/* Sección de Acción */}
-        <SettingsItem
-          icon={LogOut}
-          title="Cerrar Sesión"
-          onPress={handleLogout}
-          showChevron={false}
-        />
-      </ScrollView>
+        {/* Barra de navegación */}
+        <View style={styles.navBar}>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Inicio')}>
+            <Home color="#888" size={22} />
+            <Text style={styles.navText}>Inicio</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Perfil')}>
+            <User color="#888" size={22} />
+            <Text style={styles.navText}>Perfil</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Buscar')}>
+            <Search color="#888" size={22} />
+            <Text style={styles.navText}>Buscar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
+            <Settings color="#B00020" size={22} />
+            <Text style={[styles.navText, styles.navTextActive]}>Config</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </SafeAreaView>
   );
 };
 
-// Estilos específicos para ConfiguracionScreen y SettingsItem
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffffff', // blanco
+    backgroundColor: '#001F54',
   },
-  container: {
+  background: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 80,
   },
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 24,
-    color: '#001F54', // azul marino
+    color: '#fff',
+    marginBottom: 20,
     textAlign: 'center',
   },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#B00020', // rojo
-    marginTop: 24,
-    marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 8,
+  section: {
+    backgroundColor: '#003366',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
   },
   settingsItem: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F5F5F5', // gris muy claro
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    alignItems: 'center',
+    backgroundColor: '#002244',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     borderRadius: 10,
     marginBottom: 8,
-    borderLeftWidth: 5,
-    borderLeftColor: '#001F54', // azul marino como acento
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
   },
   settingsItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   settingsIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   settingsItemText: {
-    fontSize: 16,
-    color: '#001F54', // azul marino
+    color: '#fff',
+    fontSize: 15,
   },
   settingsItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  dangerItem: {
+    backgroundColor: '#FFF0F0',
+  },
+  dangerText: {
+    color: '#B00020',
+    fontWeight: 'bold',
+  },
+  navBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: '#ccc',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#999',
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navText: {
+    fontSize: 12,
+    color: '#555',
+    marginTop: 2,
+  },
+  navItemActive: {
+    borderTopWidth: 3,
+    borderTopColor: '#B00020',
+    paddingTop: 6,
+  },
+  navTextActive: {
+    color: '#B00020',
+    fontWeight: 'bold',
+  },
 });
-
 
 export default ConfiguracionScreen;

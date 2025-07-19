@@ -5,91 +5,178 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronDown, ChevronUp } from 'lucide-react-native'; // Importa solo los iconos necesarios
+import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react-native';
 
-// Componente para un elemento de Pregunta Frecuente (FAQ)
 const FAQItem = ({ question, answer }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <View style={styles.faqItem}>
-      <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.faqQuestionContainer}>
+      <TouchableOpacity
+        onPress={() => setExpanded(!expanded)}
+        style={styles.faqQuestionContainer}
+      >
         <Text style={styles.faqQuestion}>{question}</Text>
-        {expanded ? <ChevronUp size={20} color="#333" /> : <ChevronDown size={20} color="#333" />}
+        {expanded ? (
+          <ChevronUp size={20} color="#B00020" />
+        ) : (
+          <ChevronDown size={20} color="#B00020" />
+        )}
       </TouchableOpacity>
-      {expanded && <Text style={styles.faqAnswer}>{answer}</Text>}
+      {expanded && (
+        <Text style={styles.faqAnswer}>
+          {'   '}
+          {answer}
+        </Text>
+      )}
     </View>
   );
 };
 
-// Interfaz de Preguntas Frecuentes
 const FAQScreen = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const faqs = [
     {
       question: '¿Cómo puedo encontrar un roomie?',
-      answer: 'Puedes usar la función de búsqueda y filtrado para encontrar posibles compañeros de piso según tus preferencias. También te sugeriremos roomies compatibles.',
+      answer:
+        'Puedes usar la función de búsqueda y filtrado para encontrar posibles compañeros de piso según tus preferencias.',
     },
     {
       question: '¿Cómo funciona el sistema de mensajería?',
-      answer: 'Una vez que encuentres un roomie potencial, puedes iniciar una conversación a través de nuestra plataforma de mensajería segura para coordinar y conocerse mejor.',
+      answer:
+        'Una vez que encuentres un roomie potencial, puedes iniciar una conversación a través de nuestra plataforma de mensajería segura.',
     },
     {
       question: '¿Puedo dejar reseñas sobre mis roomies anteriores?',
-      answer: 'Sí, nuestra plataforma te permite dejar reseñas y calificaciones sobre tus experiencias con compañeros de piso anteriores para ayudar a otros usuarios.',
+      answer:
+        'Sí, nuestra plataforma te permite dejar reseñas y calificaciones sobre tus experiencias con compañeros de piso anteriores.',
     },
     {
       question: '¿Cómo garantizan mi seguridad y privacidad?',
-      answer: 'Implementamos medidas de seguridad robustas para proteger tus datos personales y ofrecemos procesos de verificación de identidad para mayor confianza.',
+      answer:
+        'Implementamos medidas de seguridad robustas para proteger tus datos personales y verificación de identidad para mayor confianza.',
     },
     {
       question: '¿Qué hago si tengo un problema con la aplicación?',
-      answer: 'Puedes contactar a nuestro equipo de soporte a través de la sección "Soporte" en la configuración de la aplicación. Estamos aquí para ayudarte.',
+      answer:
+        'Puedes contactar a nuestro equipo de soporte a través de la sección "Soporte" en la configuración.',
     },
   ];
 
+  const filteredFaqs = faqs.filter((faq) =>
+    faq.question.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Preguntas Frecuentes</Text>
-        {faqs.map((faq, index) => (
-          <FAQItem key={index} question={faq.question} answer={faq.answer} />
-        ))}
-      </ScrollView>
+      <ImageBackground
+        source={require('../assets/logo_fondo.jpeg')} // asegúrate de tener esta imagen
+        style={styles.background}
+        imageStyle={{ opacity: 0.05 }}
+      >
+        {/* Barra superior */}
+        <View style={styles.topBar}>
+          <TouchableOpacity style={styles.backButton}>
+            <ArrowLeft color="#fff" size={24} />
+          </TouchableOpacity>
+          <Text style={styles.screenTitle}>Preguntas Frecuentes</Text>
+        </View>
+
+        {/* Barra de búsqueda */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Buscar pregunta..."
+            placeholderTextColor="#ccc"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchInput}
+          />
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View style={styles.categoryBox}>
+            <Text style={styles.categoryTitle}>Categoría General</Text>
+            {filteredFaqs.map((faq, index) => (
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </ImageBackground>
     </SafeAreaView>
   );
 };
 
-// Estilos específicos para FAQScreen y FAQItem
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffffff', // blanco
+    backgroundColor: '#001F54', // Azul marino como base
   },
-  container: {
+  background: {
     flex: 1,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#B00020', // Rojo dominante
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButton: {
+    marginRight: 12,
+  },
+  screenTitle: {
+    fontSize: 20,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  searchContainer: {
+    backgroundColor: '#002E6D',
+    padding: 10,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+    fontSize: 14,
+    color: '#333',
+  },
+  scroll: {
     padding: 16,
   },
-  header: {
-    fontSize: 28,
+  categoryBox: {
+    backgroundColor: '#003366',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  categoryTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 24,
-    color: '#001F54', // azul marino
-    textAlign: 'center',
+    color: '#fff',
+    marginBottom: 12,
   },
   faqItem: {
-    backgroundColor: '#F5F5F5', // gris claro
-    padding: 16,
+    backgroundColor: '#fff', // fondo blanco
+    padding: 14,
     borderRadius: 10,
     marginBottom: 10,
-    borderLeftWidth: 5,
-    borderLeftColor: '#B00020', // rojo como acento
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    borderLeftWidth: 6,
+    borderLeftColor: '#B00020', // borde rojo
   },
   faqQuestionContainer: {
     flexDirection: 'row',
@@ -99,17 +186,17 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#001F54', // azul marino
+    color: '#B00020', // texto rojo
     flex: 1,
     marginRight: 10,
   },
   faqAnswer: {
     fontSize: 14,
-    color: '#333',
-    marginTop: 10,
+    color: '#B00020', // texto rojo
+    marginTop: 8,
+    marginLeft: 10,
     lineHeight: 20,
   },
 });
-
 
 export default FAQScreen;
