@@ -1,8 +1,0 @@
-npm install @react-navigation/native
-npm install @react-navigation/native-stack
-npm install react-native-safe-area-context
-npm install react-native-gesture-handler
-npm install react-native-screens react-native-reanimated react-native-vector-icons
-npm install lucide-react-native
-
-npx expo install react-native-safe-area-context react-native-gesture-handler react-native-reanimated react-native-screens
